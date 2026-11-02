@@ -1,0 +1,251 @@
+### ==============================================================
+### LIBRARY MANAGEMENT SYSTEM - API TESTING SUITE
+### Base URL can be http://localhost:5000 or http://localhost:5168
+### ==============================================================
+@baseUrl = http://localhost:5000
+@contentType = application/json
+
+### -------------------------------------------------------------
+### 1. AUTHENTICATION & USERS
+### -------------------------------------------------------------
+
+### 1.1 Admin Login
+# @name adminLogin
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "admin@library.com",
+  "password": "Admin@123"
+}
+
+### Capture Admin Token
+@adminToken = {{adminLogin.response.body.token}}
+
+### 1.2 Member Login
+# @name memberLogin
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{contentType}}
+
+{
+  "email": "member@library.com",
+  "password": "Member@123"
+}
+
+### Capture Member Token
+@memberToken = {{memberLogin.response.body.token}}
+
+### 1.3 Register a New Member
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{contentType}}
+
+{
+  "fullName": "Sophia Bennett",
+  "email": "sophia.bennett@example.com",
+  "password": "Password@123",
+  "phoneNumber": "+1 (555) 345-6789",
+  "address": "404 Silicon Alley, Austin, TX",
+  "role": "Member"
+}
+
+### 1.4 Get Current Logged-in User Profile (Admin)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{adminToken}}
+
+### 1.5 Get Current Logged-in User Profile (Member)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{memberToken}}
+
+### 1.6 List All Members (Admin / Librarian)
+GET {{baseUrl}}/api/users?role=Member
+Authorization: Bearer {{adminToken}}
+
+
+### -------------------------------------------------------------
+### 2. DASHBOARD & METRICS
+### -------------------------------------------------------------
+
+### 2.1 Get Complete Dashboard Statistics & Trends
+GET {{baseUrl}}/api/dashboard/stats
+
+
+### -------------------------------------------------------------
+### 3. CATEGORIES MANAGEMENT
+### -------------------------------------------------------------
+
+### 3.1 Get All Categories
+GET {{baseUrl}}/api/categories
+
+### 3.2 Get Category by ID
+GET {{baseUrl}}/api/categories/1
+
+### 3.3 Create New Category (Admin / Librarian)
+POST {{baseUrl}}/api/categories
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Cloud & Cybersecurity",
+  "description": "Network security, cryptography, and distributed cloud computing."
+}
+
+### 3.4 Update Category
+PUT {{baseUrl}}/api/categories/1
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Computer Science & Engineering",
+  "description": "Programming, algorithms, system architecture, microservices, and DevOps."
+}
+
+
+### -------------------------------------------------------------
+### 4. AUTHORS MANAGEMENT
+### -------------------------------------------------------------
+
+### 4.1 Get All Authors
+GET {{baseUrl}}/api/authors
+
+### 4.2 Get Author by ID
+GET {{baseUrl}}/api/authors/1
+
+### 4.3 Create New Author (Admin / Librarian)
+POST {{baseUrl}}/api/authors
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Gene Kim",
+  "biography": "Author of The Phoenix Project and The Unicorn Project, DevOps researcher.",
+  "nationality": "American"
+}
+
+
+### -------------------------------------------------------------
+### 5. BOOKS CATALOG & INVENTORY
+### -------------------------------------------------------------
+
+### 5.1 Search Books with Pagination
+GET {{baseUrl}}/api/books?search=Clean&pageNumber=1&pageSize=10
+
+### 5.2 Filter Books by Category (e.g. Category ID 1)
+GET {{baseUrl}}/api/books?categoryId=1&availableOnly=true
+
+### 5.3 Get Book by ID
+GET {{baseUrl}}/api/books/1
+
+### 5.4 Add New Book (Admin / Librarian)
+POST {{baseUrl}}/api/books
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "The Pragmatic Programmer: Your Journey To Mastery",
+  "isbn": "978-0135957059",
+  "description": "David Thomas and Andrew Hunt explore modern software development philosophies, career navigation, and maintainability.",
+  "authorId": 1,
+  "categoryId": 1,
+  "publisherId": 2,
+  "publishedYear": 2019,
+  "edition": "20th Anniversary Edition",
+  "shelfLocation": "Stack A-12, Tier 1",
+  "coverImageUrl": "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=500&auto=format&fit=crop&q=60",
+  "totalCopies": 5
+}
+
+### 5.5 Update Book Details
+PUT {{baseUrl}}/api/books/1
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "title": "Clean Code: A Handbook of Agile Software Craftsmanship",
+  "isbn": "978-0132350884",
+  "description": "Even bad code can function. But if code isn't clean, it can bring an organization to its knees.",
+  "authorId": 1,
+  "categoryId": 1,
+  "publisherId": 2,
+  "publishedYear": 2008,
+  "edition": "1st Edition",
+  "shelfLocation": "Stack A-14, Tier 2",
+  "coverImageUrl": "https://images.unsplash.com/photo-1532012164546-f432f2e3edd4?w=500&auto=format&fit=crop&q=60",
+  "totalCopies": 5,
+  "availableCopies": 4
+}
+
+
+### -------------------------------------------------------------
+### 6. BORROWING & LOAN LIFECYCLE
+### -------------------------------------------------------------
+
+### 6.1 Borrow a Book (Member / Staff)
+POST {{baseUrl}}/api/borrowrecords/borrow
+Authorization: Bearer {{memberToken}}
+Content-Type: {{contentType}}
+
+{
+  "bookId": 3,
+  "userId": 3,
+  "dueDays": 14,
+  "notes": "Research for software design sprint."
+}
+
+### 6.2 View My Borrow History (Member)
+GET {{baseUrl}}/api/borrowrecords/my-history
+Authorization: Bearer {{memberToken}}
+
+### 6.3 View All Active Borrows (Admin / Librarian)
+GET {{baseUrl}}/api/borrowrecords?status=Active
+Authorization: Bearer {{adminToken}}
+
+### 6.4 View All Overdue Borrows (Admin / Librarian)
+GET {{baseUrl}}/api/borrowrecords?status=Overdue
+Authorization: Bearer {{adminToken}}
+
+### 6.5 Return a Borrowed Book
+POST {{baseUrl}}/api/borrowrecords/return
+Authorization: Bearer {{adminToken}}
+Content-Type: {{contentType}}
+
+{
+  "borrowRecordId": 1,
+  "notes": "Book checked in at circulation desk in good condition."
+}
+
+### 6.6 Pay Outstanding Fine
+POST {{baseUrl}}/api/borrowrecords/pay-fine
+Authorization: Bearer {{memberToken}}
+Content-Type: {{contentType}}
+
+{
+  "borrowRecordId": 3
+}
+
+
+### -------------------------------------------------------------
+### 7. RESERVATIONS
+### -------------------------------------------------------------
+
+### 7.1 Reserve a Book (Member)
+POST {{baseUrl}}/api/reservations
+Authorization: Bearer {{memberToken}}
+Content-Type: {{contentType}}
+
+{
+  "bookId": 4,
+  "userId": 3,
+  "notes": "Hold for pickup on Saturday morning."
+}
+
+### 7.2 View My Reservations (Member)
+GET {{baseUrl}}/api/reservations/my-reservations
+Authorization: Bearer {{memberToken}}
+
+### 7.3 View All Reservations (Admin / Librarian)
+GET {{baseUrl}}/api/reservations
+Authorization: Bearer {{adminToken}}
+
+### 7.4 Cancel a Reservation
+PUT {{baseUrl}}/api/reservations/1/cancel
+Authorization: Bearer {{memberToken}}

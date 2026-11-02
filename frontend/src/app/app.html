@@ -1,0 +1,104 @@
+<div class="app-layout">
+  <!-- Top Navigation Bar -->
+  <header class="top-navbar">
+    <div class="nav-container">
+      <!-- Brand Logo -->
+      <a routerLink="/" class="brand-link">
+        <div class="brand-emblem">
+          <span class="emblem-glyph">✦</span>
+        </div>
+        <div class="brand-text">
+          <span class="brand-title">ATHENA</span>
+          <span class="brand-subtitle">Library Management</span>
+        </div>
+      </a>
+
+      <!-- Primary Navigation -->
+      <nav class="nav-menu">
+        <a routerLink="/catalog" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📖</span>
+          <span>Catalog</span>
+        </a>
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </a>
+        <a routerLink="/circulation" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">⇄</span>
+          <span>Circulation Desk</span>
+        </a>
+        <a routerLink="/my-loans" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">💳</span>
+          <span>My Loans</span>
+        </a>
+        @if (authService.isStaff()) {
+          <a routerLink="/manage" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">🏷️</span>
+            <span>Taxonomy</span>
+          </a>
+        }
+      </nav>
+
+      <!-- User Account & Quick Switcher -->
+      <div class="header-actions">
+        <!-- Quick Switcher Dropdown / Pills -->
+        <div class="demo-pills" title="Quick switch roles for testing">
+          <button class="role-pill" (click)="quickDemo('admin')">Admin</button>
+          <button class="role-pill" (click)="quickDemo('librarian')">Librarian</button>
+          <button class="role-pill" (click)="quickDemo('member')">Member</button>
+        </div>
+
+        @if (authService.isAuthenticated()) {
+          <div class="user-profile-chip">
+            <div class="avatar-circle">
+              {{ authService.currentUser()?.fullName?.charAt(0) || 'U' }}
+            </div>
+            <div class="user-meta">
+              <span class="user-name">{{ authService.currentUser()?.fullName }}</span>
+              <span class="badge" [ngClass]="authService.isAdmin() ? 'badge-danger' : (authService.isLibrarian() ? 'badge-warning' : 'badge-success')">
+                {{ authService.currentUser()?.role }}
+              </span>
+            </div>
+            <button class="btn btn-outline btn-sm logout-btn" (click)="logout()" title="Sign Out">
+              ⏻
+            </button>
+          </div>
+        } @else {
+          <button class="btn btn-primary btn-sm" (click)="openSignIn()">
+            Sign In / Register
+          </button>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Viewport -->
+  <main class="main-content">
+    <div class="content-container">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-left">
+        <div class="system-status">
+          <span class="status-indicator"></span>
+          <span>API Connected &bull; SQL Server (LIN-5CD6268KRS) &bull; EF Core Migrations Live</span>
+        </div>
+      </div>
+      <div class="footer-right">
+        <span>Athena Enterprise LMS &bull; Designed for Capgemini &bull; Angular 21 &amp; .NET 9</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Overlay -->
+  <app-toast-container></app-toast-container>
+
+  <!-- Auth Modal -->
+  @if (showAuthModal()) {
+    <app-auth-modal (close)="showAuthModal.set(false)" />
+  }
+</div>
